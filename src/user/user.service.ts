@@ -14,7 +14,7 @@ export class UserService {
         await this.usersRepository.save({ email });
     }
 
-    async getUser(email: string): Promise<unknown> {
+    async getUser(email: string): Promise<UserEntity> {
         return await this.usersRepository.findOne({ where: { email } });
     }
 

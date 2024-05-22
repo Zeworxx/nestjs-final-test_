@@ -4,13 +4,14 @@ import {
     ConflictException,
     Controller,
     Get,
-    HttpStatus,
+    InternalServerErrorException,
     Param,
     Post,
     UsePipes,
     ValidationPipe,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 
 @Controller()
@@ -19,28 +20,22 @@ export class UserController {
 
     @Post()
     @UsePipes(new ValidationPipe())
-    addUser(@Body() body: CreateUserDto) {
+    async addUser(@Body() body: CreateUserDto): Promise<void> {
         try {
-            this.userService.addUser(body.email);
+            await this.userService.addUser(body.email);
         } catch (error) {
             if (error.code === '23505') {
-                throw new ConflictException({
-                    statusCode: HttpStatus.CONFLICT,
-                    message: 'User already exists',
-                    data: null,
-                });
+                throw new ConflictException();
             } else if (error.code === '23502') {
-                throw new BadRequestException({
-                    statusCode: HttpStatus.BAD_REQUEST,
-                    message: 'Missing required fields',
-                    data: null,
-                });
+                throw new BadRequestException();
+            } else {
+                throw new InternalServerErrorException();
             }
         }
     }
 
     @Get('user/:email')
-    async getUser(@Param('email') email: string) {
+    async getUser(@Param('email') email: string): Promise<UserEntity> {
         return this.userService.getUser(email);
     }
 
