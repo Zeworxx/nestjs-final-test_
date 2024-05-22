@@ -2,59 +2,64 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Get,
     HttpStatus,
+    InternalServerErrorException,
+    Param,
+    ParseIntPipe,
     Post,
-    UsePipes,
     ValidationPipe,
 } from '@nestjs/common';
+import { CreateResponse } from 'src/response/create.response';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { TaskEntity } from './task.entity';
 import { TaskService } from './task.service';
-// import { ParseIntWithPositiveValuePipe } from './validator/ParseIntWithPositiveValue.pipe';
 
 @Controller()
 export class TaskController {
     constructor(private taskService: TaskService) {}
 
     @Post()
-    @UsePipes(ValidationPipe)
-    async createTask(@Body() createTaskDto: CreateTaskDto) {
+    async addTask(
+        @Body(new ValidationPipe()) createTaskDto: CreateTaskDto,
+    ): Promise<CreateResponse> {
         try {
-            const data = await this.taskService.addTask(
+            await this.taskService.addTask(
                 createTaskDto.name,
                 createTaskDto.userId,
                 createTaskDto.priority,
             );
             return {
-                statusCode: HttpStatus.CREATED,
+                status: HttpStatus.CREATED,
                 message: 'Task created successfully',
-                data,
             };
         } catch (error) {
-            throw new BadRequestException({
-                statusCode: HttpStatus.BAD_REQUEST,
-                message: 'Missing required fields',
-                data: null,
-            });
+            if (error.code === '23502') {
+                throw new BadRequestException();
+            } else {
+                throw new InternalServerErrorException();
+            }
         }
     }
 
-    // @Get('user/:userId')
-    // async getUserTasks(
-    //     @Param('userId', ParseIntWithPositiveValuePipe) userId: number,
-    // ): Promise<Task[]> {
-    //     try {
-    //         return await this.taskService.getUserTasks(userId);
-    //     } catch (error) {
-    //         throw new BadRequestException({
-    //             statusCode: HttpStatus.BAD_REQUEST,
-    //             message: 'Invalid user ID',
-    //             data: null,
-    //         });
-    //     }
-    // }
+    @Get('user/:userId')
+    async getTasksByUserId(
+        @Param(
+            'userId',
+            new ParseIntPipe({
+                exceptionFactory: () => new BadRequestException(),
+            }),
+        )
+        userId: number,
+    ): Promise<TaskEntity[]> {
+        try {
+            if (userId < 0) {
+                throw new BadRequestException();
+            }
 
-    @Post('clear')
-    async resetData(): Promise<void> {
-        return this.taskService.resetData();
+            return await this.taskService.getUserTasks(userId);
+        } catch (error) {
+            throw new BadRequestException();
+        }
     }
 }
