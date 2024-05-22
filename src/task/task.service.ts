@@ -1,22 +1,32 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { TaskEntity } from './task.entity';
 
 @Injectable()
 export class TaskService {
-    constructor() {}
+    constructor(
+        @InjectRepository(TaskEntity)
+        private tasksRepository: Repository<TaskEntity>,
+    ) {}
 
-    addTask(name: string, userId: string, priority: number): Promise<void> {
-        throw new NotImplementedException();
+    async addTask(
+        name: string,
+        userId: number,
+        priority: number,
+    ): Promise<TaskEntity> {
+        return this.tasksRepository.save({ name, userId, priority });
     }
 
-    getTaskByName(name: string): Promise<unknown> {
-        throw new NotImplementedException();
+    async getTaskByName(name: string): Promise<TaskEntity> {
+        return await this.tasksRepository.findOne({ where: { name } });
     }
 
-    getUserTasks(userId: string): Promise<unknown[]> {
-        throw new NotImplementedException();
+    async getUserTasks(userId: number): Promise<TaskEntity[]> {
+        return this.tasksRepository.find({ where: { userId } });
     }
 
-    resetData(): Promise<void> {
-        throw new NotImplementedException();
+    async resetData(): Promise<void> {
+        return this.tasksRepository.clear();
     }
 }
