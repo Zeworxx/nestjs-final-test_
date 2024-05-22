@@ -18,23 +18,14 @@ Install the project dependencies :
 npm ci
 ```
 
-Start the project : 
-
-### Windows
+## Start the project
 
 ```bash
-npm run start:postgres:windows
-```
-
-### Linux 
-
-```bash
-npm run start:postgres:linux
+npm run start:postgres
 ```
 
 ## Test
 
-Start test : 
 
 ```bash
 npm run test:e2e:postgres
