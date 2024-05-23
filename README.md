@@ -20,15 +20,28 @@ npm ci
 
 ## Start the project
 
+## Linux
+
 ```bash
-npm run start:postgres
+npm run start:postgres:linux
 ```
 
-## Test
-
+# Test
 
 ```bash
-npm run test:e2e:postgres
+npm run test:e2e:postgres:linux
+```
+
+## Windows
+
+```bash
+npm run start:postgres:windows
+```
+
+# Test
+
+```bash
+npm run test:e2e:postgres:windows
 ```
 
 By GIRARD Baptiste
